@@ -13,16 +13,16 @@ def analyze_indicators(df):
     current_rsi = rsi[-1]
     signals['RSI'] = {
         'value': round(current_rsi, 2),
-        'buy_strength': 20 if current_rsi < 30 else (10 if current_rsi < 45 else 0),
-        'sell_strength': 20 if current_rsi > 70 else (10 if current_rsi > 55 else 0)
+        'buy_strength': 20 if current_rsi < 25 else (10 if current_rsi < 40 else 0),
+        'sell_strength': 20 if current_rsi > 75 else (10 if current_rsi > 60 else 0)
     }
     
     # MACD Analysis (20%)
     macd, signal, hist = calculate_macd(df['close'])
-    current_hist = hist.iloc[-1]  # Changed from hist[-1] to hist.iloc[-1]
-    prev_hist = hist.iloc[-2]     # Get previous histogram value
+    current_hist = hist.iloc[-1]
+    prev_hist = hist.iloc[-2]
     signals['MACD'] = {
-        'value': round(current_hist, 4),
+        'value': round(current_hist, 8),
         'buy_strength': 20 if current_hist > 0 and current_hist > prev_hist else 0,
         'sell_strength': 20 if current_hist < 0 and current_hist < prev_hist else 0
     }
@@ -64,23 +64,5 @@ def analyze_indicators(df):
         'indicators': signals,
         'total_buy': total_buy,
         'total_sell': total_sell,
-        'current_price': round(current_price, 4)
+        'current_price': round(current_price, 8)
     }
-
-def format_analysis_output(analysis):
-    """Format analysis results for display"""
-    output = "\n=== Detailed Analysis ===\n"
-    output += f"Current Price: ${analysis['current_price']}\n\n"
-    
-    output += "Individual Indicator Signals:\n"
-    for indicator, data in analysis['indicators'].items():
-        output += f"\n{indicator}:"
-        output += f"\n  Value: {data['value']}"
-        output += f"\n  Buy Strength: {'=' * int(data['buy_strength']/2)} {data['buy_strength']}%"
-        output += f"\n  Sell Strength: {'=' * int(data['sell_strength']/2)} {data['sell_strength']}%"
-    
-    output += "\n\nOverall Signal Strength:"
-    output += f"\nBUY:  {'=' * int(analysis['total_buy']/2)} {analysis['total_buy']}%"
-    output += f"\nSELL: {'=' * int(analysis['total_sell']/2)} {analysis['total_sell']}%"
-    
-    return output
