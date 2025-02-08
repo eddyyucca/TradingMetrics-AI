@@ -1,3 +1,4 @@
+import time
 import requests
 import pandas as pd
 import numpy as np
@@ -28,6 +29,26 @@ def print_banner():
 """, 'green', attrs=['bold'])
     print(banner)
 
+    """Display startup banner with tool information and loading animation"""
+    import time
+    # Loading animation
+    loading_stages = [
+        "Memuat modul analisis...",
+        "Menginisialisasi konfigurasi...",
+        "Menyiapkan data historis...",
+        "Mengonfigurasi indikator teknikal...",
+        "Membangun model keputusan...",
+        "Siap untuk digunakan :)"
+    ]
+    for stage in loading_stages:
+        print(colored("• ", 'green') + colored(stage, 'white'))
+        time.sleep(0.5)  # Simulasi proses loading
+    
+    # Tampilkan waktu dan informasi tambahan
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print("\n")
+    print(colored(f"Waktu Inisialisasi: {current_time}", 'yellow'))
+    logger.info("TradingMetrics-AI diinisialisasi")
 def ambil_data_crypto(simbol, interval="15m", limit=100):
     try:
         url = "https://api.binance.com/api/v3/klines"
