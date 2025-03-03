@@ -1,1 +1,1 @@
-{"tracked_coins": [{"symbol": "BTC", "timeframe": "15m"}, {"symbol": "SUI", "timeframe": "15m"}], "refresh_interval": 30}
+{"tracked_coins": [{"symbol": "BTC", "timeframe": "15m"}], "refresh_interval": 30}

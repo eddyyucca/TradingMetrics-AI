@@ -15,8 +15,18 @@ import os
 import sys
 from tabulate import tabulate
 
+# Cek apakah modul intelligence_integration tersedia
+try:
+    from intelligence_integration import run_comprehensive_analysis, format_advanced_analysis_output
+    AI_FEATURES_AVAILABLE = True
+except ImportError:
+    AI_FEATURES_AVAILABLE = False
+    print("Modul kecerdasan buatan tidak tersedia. Fitur AI tidak akan ditampilkan.")
+
+# Inisialisasi colorama untuk output berwarna di terminal
 colorama.init()
 
+# Konfigurasi logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s: %(message)s',
@@ -30,7 +40,10 @@ live_thread = None
 tracked_coins = []
 refresh_interval = 60  # Refresh data setiap 60 detik secara default
 
+# ===== TAHAP 1: FUNGSI DASAR =====
+
 def print_banner():
+    """Menampilkan banner aplikasi"""
     banner = colored("""
 ╔═══════════════════════════════════════════════════════════╗
 ║           TradingMetrics-AI - v2.1.0                      ║
@@ -42,8 +55,6 @@ def print_banner():
 """, 'green', attrs=['bold'])
     print(banner)
 
-    """Display startup banner with tool information and loading animation"""
-    import time
     # Loading animation
     loading_stages = [
         "Memuat modul analisis...",
@@ -64,6 +75,7 @@ def print_banner():
     logger.info("TradingMetrics-AI diinisialisasi")
 
 def ambil_data_crypto(simbol, interval="15m", limit=100):
+    """Mengambil data cryptocurrency dari CoinGecko API"""
     try:
         # Mapping interval ke days untuk CoinGecko
         days_map = {
@@ -94,7 +106,27 @@ def ambil_data_crypto(simbol, interval="15m", limit=100):
             'WLD': 'worldcoin-wld',
             'INJ': 'injective-protocol',
             'SUI': 'sui',
-            'FLOKI': 'floki'
+            'FLOKI': 'floki',
+            'ATOM': 'cosmos',
+            'NEAR': 'near',
+            'FTM': 'fantom',
+            'APE': 'apecoin',
+            'OP': 'optimism',
+            'ARB': 'arbitrum',
+            'LTC': 'litecoin',
+            'BCH': 'bitcoin-cash',
+            'TRX': 'tron',
+            'ETC': 'ethereum-classic',
+            'FIL': 'filecoin',
+            'ICP': 'internet-computer',
+            'SAND': 'the-sandbox',
+            'GALA': 'gala',
+            'APT': 'aptos',
+            'AAVE': 'aave',
+            'SXP': 'swipe',
+            'GMT': 'stepn',
+            'ALGO': 'algorand',
+            '1INCH': '1inch'
         }
         
         if simbol not in coin_map:
@@ -157,6 +189,7 @@ def ambil_data_crypto(simbol, interval="15m", limit=100):
         return None
 
 def hitung_level_resiko(df, harga_sekarang, modal_awal=150000):
+    """Menghitung level risiko dan rekomendasi stop loss/take profit"""
     volatilitas = df['close'].pct_change().std() * 100
     atr = df['high'].rolling(14).max() - df['low'].rolling(14).min()
     rata_atr = atr.mean()
@@ -205,6 +238,7 @@ def hitung_level_resiko(df, harga_sekarang, modal_awal=150000):
     }
 
 def hitung_indikator_tambahan(df):
+    """Menghitung indikator teknikal tambahan"""
     df['EMA9'] = df['close'].ewm(span=9).mean()
     df['EMA20'] = df['close'].ewm(span=20).mean()
     df['EMA50'] = df['close'].ewm(span=50).mean()
@@ -245,6 +279,7 @@ def hitung_indikator_tambahan(df):
     }
 
 def analisis_momentum(df):
+    """Menganalisis momentum harga"""
     momentum = df['close'].diff(periods=10).iloc[-1]
     tren_kekuatan = 0
     
@@ -264,6 +299,7 @@ def analisis_momentum(df):
     }
 
 def format_output_crypto(analisis, simbol, timeframe, df):
+    """Format output analisis untuk ditampilkan di terminal"""
     harga_sekarang = analisis['current_price']
     level_resiko = hitung_level_resiko(df, harga_sekarang)
     indikator = hitung_indikator_tambahan(df)
@@ -368,6 +404,8 @@ def print_live_decision_table(decisions):
         print(tabulate(table_data, headers=headers, tablefmt="grid"))
     else:
         print(colored("\nBelum ada data keputusan trading. Silakan tambahkan aset untuk dipantau.", 'yellow'))
+
+# ===== TAHAP 2: FUNGSI FITUR LIVE MONITORING =====
 
 def run_live_monitoring():
     """Fungsi untuk menjalankan pemantauan trading secara live"""
@@ -576,8 +614,45 @@ def manage_tracked_coins(cryptos, timeframes):
             except ValueError:
                 print(colored("Input tidak valid! Gunakan angka.", 'red'))
 
+    
+def simpan_data_konfigurasi():
+    """Simpan data konfigurasi dan aset yang dipantau"""
+    try:
+        # Pastikan direktori ada
+        os.makedirs('config', exist_ok=True)
+        
+        config = {
+            'tracked_coins': tracked_coins,
+            'refresh_interval': refresh_interval
+        }
+        
+        with open('config/tradingmetrics_config.json', 'w') as f:
+            json.dump(config, f)
+        
+        logger.info("Konfigurasi berhasil disimpan")
+    except Exception as e:
+        logger.error(f"Error menyimpan konfigurasi: {str(e)}")
+
+def load_data_konfigurasi():
+    """Muat data konfigurasi dari file"""
+    global tracked_coins, refresh_interval
+    
+    try:
+        if os.path.exists('config/tradingmetrics_config.json'):
+            with open('config/tradingmetrics_config.json', 'r') as f:
+                config = json.load(f)
+            
+            tracked_coins = config.get('tracked_coins', [])
+            refresh_interval = config.get('refresh_interval', 60)
+            
+            logger.info(f"Konfigurasi dimuat: {len(tracked_coins)} aset, interval {refresh_interval}s")
+        else:
+            logger.info("File konfigurasi tidak ditemukan, menggunakan nilai default")
+    except Exception as e:
+        logger.error(f"Error memuat konfigurasi: {str(e)}")
+
 def main():
-    print_banner()
+    """Fungsi utama program"""
     cryptos = {
         '1': 'BTC',
         '2': 'DOGE',
@@ -598,7 +673,27 @@ def main():
         '17': 'BONK',
         '18': 'WLD',
         '19': 'INJ',
-        '20': 'SUI'
+        '20': 'SUI',
+        '21': 'ATOM',
+        '22': 'NEAR',
+        '23': 'FTM',
+        '24': 'APE',
+        '25': 'OP',
+        '26': 'ARB',
+        '27': 'LTC',
+        '28': 'BCH',
+        '29': 'TRX',
+        '30': 'ETC',
+        '31': 'FIL',
+        '32': 'ICP',
+        '33': 'SAND',
+        '34': 'GALA',
+        '35': 'APT',
+        '36': 'AAVE',
+        '37': 'SXP',
+        '38': 'GMT',
+        '39': 'ALGO',
+        '40': '1INCH'
     }
     
     timeframes = {
@@ -618,9 +713,16 @@ def main():
         print(colored("1. Analisis Single Crypto", 'yellow'))
         print(colored("2. Mode Live Monitoring", 'yellow'))
         print(colored("3. Kelola Aset yang Dipantau", 'yellow'))
+        if AI_FEATURES_AVAILABLE:
+            print(colored("4. Analisis Lanjutan dengan AI", 'yellow'))
         print(colored("0. Keluar", 'yellow'))
         
-        pilihan_menu = input(colored("\nMasukkan pilihan (0-3): ", 'green'))
+        if AI_FEATURES_AVAILABLE:
+            pilihan_range = "(0-4)"
+        else:
+            pilihan_range = "(0-3)"
+            
+        pilihan_menu = input(colored(f"\nMasukkan pilihan {pilihan_range}: ", 'green'))
         
         if pilihan_menu == '0':
             # Pastikan untuk menghentikan thread live jika masih berjalan
@@ -645,7 +747,7 @@ def main():
                 print(f"{key}. {value}/USDT")
             print("0. Kembali")
             
-            pilihan = input(colored("\nMasukkan pilihan (0-20): ", 'green'))
+            pilihan = input(colored("\nMasukkan pilihan (0-40): ", 'green'))
             
             if pilihan == '0':
                 continue
@@ -749,42 +851,93 @@ def main():
                 stop_live_monitoring()
             
             manage_tracked_coins(cryptos, timeframes)
-
-def simpan_data_konfigurasi():
-    """Simpan data konfigurasi dan aset yang dipantau"""
-    try:
-        config = {
-            'tracked_coins': tracked_coins,
-            'refresh_interval': refresh_interval
-        }
-        
-        with open('tradingmetrics_config.json', 'w') as f:
-            json.dump(config, f)
-        
-        logger.info("Konfigurasi berhasil disimpan")
-    except Exception as e:
-        logger.error(f"Error menyimpan konfigurasi: {str(e)}")
-
-def load_data_konfigurasi():
-    """Muat data konfigurasi dari file"""
-    global tracked_coins, refresh_interval
-    
-    try:
-        if os.path.exists('tradingmetrics_config.json'):
-            with open('tradingmetrics_config.json', 'r') as f:
-                config = json.load(f)
             
-            tracked_coins = config.get('tracked_coins', [])
-            refresh_interval = config.get('refresh_interval', 60)
+        elif pilihan_menu == '4' and AI_FEATURES_AVAILABLE:
+            # Analisis Lanjutan dengan AI
             
-            logger.info(f"Konfigurasi dimuat: {len(tracked_coins)} aset, interval {refresh_interval}s")
-        else:
-            logger.info("File konfigurasi tidak ditemukan, menggunakan nilai default")
-    except Exception as e:
-        logger.error(f"Error memuat konfigurasi: {str(e)}")
+            # Jika mode live sedang berjalan, hentikan dulu
+            if live_running:
+                stop_live_monitoring()
+            
+            # Clear console/terminal
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print_banner()
+            
+            print(colored("\n=== Analisis Lanjutan dengan AI ===", 'cyan', attrs=['bold']))
+            print(colored("Data diambil dari CoinGecko API", 'yellow'))
+            print(colored("\nPilih Crypto:", 'yellow'))
+            for key, value in cryptos.items():
+                print(f"{key}. {value}/USDT")
+            print("0. Kembali")
+            
+            pilihan = input(colored("\nMasukkan pilihan (0-40): ", 'green'))
+            
+            if pilihan == '0':
+                continue
+                
+            if pilihan not in cryptos:
+                print(colored("Pilihan tidak valid!", 'red'))
+                continue
+                
+            print(colored("\nPilih Timeframe:", 'yellow'))
+            print("1. 15 Menit")
+            print("2. 30 Menit")
+            print("3. 1 Jam")
+            print("4. 4 Jam")
+            
+            pilihan_tf = input(colored("\nMasukkan timeframe (1-4): ", 'green'))
+            
+            if pilihan_tf not in timeframes:
+                print(colored("Timeframe tidak valid!", 'red'))
+                continue
+            
+            print(colored("\nMengambil dan menganalisis data...", 'yellow'))
+            df = ambil_data_crypto(cryptos[pilihan], timeframes[pilihan_tf])
+            
+            if df is not None:
+                # Jalankan analisis lanjutan
+                analysis_results = run_comprehensive_analysis(
+                    df, 
+                    cryptos[pilihan], 
+                    timeframes[pilihan_tf]
+                )
+                
+                # Format dan tampilkan output
+                advanced_output = format_advanced_analysis_output(
+                    analysis_results,
+                    cryptos[pilihan],
+                    timeframes[pilihan_tf]
+                )
+                
+                print(advanced_output)
+                
+                # Beri opsi untuk menyimpan hasil analisis
+                save_option = input(colored("\nSimpan hasil analisis? (y/n): ", 'green'))
+                if save_option.lower() == 'y':
+                    result_dir = "analysis_results"
+                    os.makedirs(result_dir, exist_ok=True)
+                    
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    filename = f"{result_dir}/{cryptos[pilihan]}_{timeframes[pilihan_tf]}_{timestamp}.txt"
+                    
+                    with open(filename, 'w') as f:
+                        f.write(advanced_output)
+                    
+                    print(colored(f"Hasil analisis disimpan di {filename}", 'green'))
+            else:
+                print(colored("Gagal mengambil data. Silakan coba lagi.", 'red'))
+            
+            input(colored("\nTekan Enter untuk melanjutkan...", 'green'))
 
 if __name__ == "__main__":
     try:
+        # Buat struktur direktori yang diperlukan
+        os.makedirs('config', exist_ok=True)
+        os.makedirs('analysis_results', exist_ok=True)
+        if AI_FEATURES_AVAILABLE:
+            os.makedirs('data', exist_ok=True)
+            os.makedirs('models', exist_ok=True)
+        
         # Muat konfigurasi sebelum memulai
         load_data_konfigurasi()
         

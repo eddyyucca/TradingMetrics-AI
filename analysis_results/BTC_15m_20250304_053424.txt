@@ -1,0 +1,54 @@
+
+=== AI TRADING ADVISOR (BTC/15m) ===
+Recommended Action: [1m[33mHOLD[0m
+Confidence: [36m16.1%[0m
+
+[1m[33mTrading Advice:
+[0m• Market signals are mixed with 16.1% confidence. Hold current positions.
+• Wait for stronger signals before making new entries.
+• Recommended position size: $0.02
+• Consider trailing stops to maximize profit potential
+• Look for higher timeframe confluence for entries
+• Short timeframe signals can be noisy. Confirm with higher timeframe analysis.
+• Strong correlation with overall market sentiment. Monitor broader market conditions.
+• Moderate ML signal (67.7% confidence) for price to move DOWN
+
+[1m[33mAnalysis Contributors:
+[0m• Technical Analysis: 10.5
+• Market Context: 0.0
+• Pattern Recognition: 0.0
+• Machine Learning: -16.9
+
+[1m[36mMarket Context:
+[0m• Market Phase: Ranging (Price is moving sideways in a tight range)
+• Volatility: 0.48%
+[32m
+Support Levels:
+[0m• S1: $85236.03 (Strength: 94%)
+[31m
+Resistance Levels:
+[0m• R1: $86270.85 (Strength: 98%)
+• R2: $87555.10 (Strength: 89%)
+• R3: $90993.13 (Strength: 65%)
+
+[1m[31mRisk Management:
+[0m• Risk Profile: Low
+• Recommended Position Size: $0.02
+• Risk Amount: $20.00
+[33m
+Recommended Levels:
+[0m• Stop Loss: $85194.77 (Tight: $85421.98, Wide: $84801.49)
+• Take Profit: $87283.46 (Conservative: $86869.80, Aggressive: $88110.78)
+• Risk:Reward Ratio: 1.46 (Conservative: 0.98, Aggressive: 2.44)
+
+[1m[34mMachine Learning Prediction:
+[0m• Predicted Direction: [31mDOWN[0m
+• Confidence: 67.7%
+• Model Freshness: Fresh (just trained)
+
+[34mML Insights:
+[0m• Moderate ML signal (67.7% confidence) for price to move DOWN
+• Caution: Model accuracy is low (45.5%)
+• Model freshness: Fresh (just trained)
+
+Execution Time: 0.23 seconds
